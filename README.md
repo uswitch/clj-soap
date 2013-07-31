@@ -15,6 +15,17 @@ You can call remote SOAP method as following:
 (let [client (soap/client-fn "http://... (URL for WSDL)")]
   (client :someMethod param1 param2 ...))
 ```
+
+#### Proxies
+
+```clojure
+(require '[clj-soap.core :as soap])
+
+(let [client (soap/client-fn "http://... (URL for WSDL)" {:proxy-host "127.0.0.1" :proxy-port 8118})]
+  (client :someMethod param1 param2 ...))
+```
+
+
 ### Server
 
 To make SOAP service:
