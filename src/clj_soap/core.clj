@@ -105,11 +105,22 @@
 (defmethod soap-str->obj :boolean [soap-str argtype] (Boolean/parseBoolean soap-str))
 (defmethod soap-str->obj :anyType [soap-str argtype] soap-str)
 
-(defn make-client [url]
+(defn make-client-options [url & [options]]
+  (let [base-options (doto (org.apache.axis2.client.Options.)
+                       (.setTo (org.apache.axis2.addressing.EndpointReference. url)))
+        {:keys [proxy-host proxy-port]} options]
+    (when (and proxy-host proxy-port)
+      (println "configuring proxy" proxy-host proxy-port)
+      (doto base-options
+        (.setProperty org.apache.axis2.transport.http.HTTPConstants/PROXY
+          (doto (org.apache.axis2.transport.http.HttpTransportProperties$ProxyProperties.)
+            (.setProxyName proxy-host)
+            (.setProxyPort proxy-port)))))
+    base-options))
+
+(defn make-client [url & [options]]
   (doto (org.apache.axis2.client.ServiceClient. nil (java.net.URL. url) nil nil)
-    (.setOptions
-      (doto (org.apache.axis2.client.Options.)
-        (.setTo (org.apache.axis2.addressing.EndpointReference. url))))))
+    (.setOptions (make-client-options url options))))
 
 (defn make-request [op & args]
   (let [factory (org.apache.axiom.om.OMAbstractFactory/getOMFactory)
@@ -134,8 +145,8 @@
     (get-result
       op (.sendReceive client (.getName op) (apply make-request op args)))))
 
-(defn client-proxy [url]
-  (let [client (make-client url)]
+(defn client-proxy [url & [options]]
+  (let [client (make-client url options)]
     (->> (for [op (axis-service-operations (.getAxisService client))]
                [(keyword (axis-op-name op))
                 (fn soap-call [& args] (apply client-call client op args))])
@@ -143,8 +154,7 @@
 
 (defn client-fn
   "Make SOAP client function, which is called as: (x :someMethod arg1 arg2 ...)"
-  [url]
-  (let [px (client-proxy url)]
+  [url & [options]]
+  (let [px (client-proxy url options)]
     (fn [opname & args]
       (apply (px opname) args))))
-
