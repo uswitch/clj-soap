@@ -110,7 +110,6 @@
                        (.setTo (org.apache.axis2.addressing.EndpointReference. url)))
         {:keys [proxy-host proxy-port]} options]
     (when (and proxy-host proxy-port)
-      (println "configuring proxy" proxy-host proxy-port)
       (doto base-options
         (.setProperty org.apache.axis2.transport.http.HTTPConstants/PROXY
           (doto (org.apache.axis2.transport.http.HttpTransportProperties$ProxyProperties.)
