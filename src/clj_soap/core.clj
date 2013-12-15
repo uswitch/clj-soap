@@ -106,20 +106,20 @@
 (defmethod soap-str->obj :anyType [soap-str argtype] soap-str)
 
 (defn make-client-options [url & [options]]
-  (let [{:keys [proxy-host proxy-port timeout]} options
+  (let [{:keys [proxy-host proxy-port socket-timeout conn-timeout]} options
         base-options (doto (org.apache.axis2.client.Options.)
                        (.setTo (org.apache.axis2.addressing.EndpointReference. url)))]
-    (when (and proxy-host proxy-port)
+    (when proxy-host
       (doto base-options
         (.setProperty org.apache.axis2.transport.http.HTTPConstants/PROXY
           (doto (org.apache.axis2.transport.http.HttpTransportProperties$ProxyProperties.)
             (.setProxyName proxy-host)
-            (.setProxyPort proxy-port)))))
-    (when timeout
+            (.setProxyPort (or proxy-port 3128))))))
+    (when-let [timeout (or socket-timeout conn-timeout)]
       (doto base-options
         (.setTimeOutInMilliSeconds timeout)
-        (.setProperty org.apache.axis2.transport.http.HTTPConstants/SO_TIMEOUT, timeout)
-        (.setProperty org.apache.axis2.transport.http.HTTPConstants/CONNECTION_TIMEOUT, timeout)))
+        (.setProperty org.apache.axis2.transport.http.HTTPConstants/SO_TIMEOUT, socket-timeout)
+        (.setProperty org.apache.axis2.transport.http.HTTPConstants/CONNECTION_TIMEOUT, conn-timeout)))
     base-options))
 
 (defn make-client [url & [options]]
