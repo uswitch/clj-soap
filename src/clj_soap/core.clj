@@ -109,7 +109,6 @@
   (let [{:keys [proxy-host proxy-port socket-timeout conn-timeout]} options
         base-options (doto (org.apache.axis2.client.Options.)
                        (.setTo (org.apache.axis2.addressing.EndpointReference. url)))]
-    (println options)
     (when proxy-host
       (doto base-options
         (.setProperty org.apache.axis2.transport.http.HTTPConstants/PROXY
@@ -119,8 +118,8 @@
     (when-let [timeout (or socket-timeout conn-timeout)]
       (doto base-options
         (.setTimeOutInMilliSeconds (Integer. timeout))
-        (.setProperty org.apache.axis2.transport.http.HTTPConstants/SO_TIMEOUT, socket-timeout)
-        (.setProperty org.apache.axis2.transport.http.HTTPConstants/CONNECTION_TIMEOUT, conn-timeout)))
+        (.setProperty org.apache.axis2.transport.http.HTTPConstants/SO_TIMEOUT, (Integer. socket-timeout))
+        (.setProperty org.apache.axis2.transport.http.HTTPConstants/CONNECTION_TIMEOUT, (Integer. conn-timeout))))
     base-options))
 
 (defn make-client [url & [options]]
