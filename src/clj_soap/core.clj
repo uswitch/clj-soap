@@ -109,6 +109,7 @@
   (let [{:keys [proxy-host proxy-port socket-timeout conn-timeout]} options
         base-options (doto (org.apache.axis2.client.Options.)
                        (.setTo (org.apache.axis2.addressing.EndpointReference. url)))]
+    (println options)
     (when proxy-host
       (doto base-options
         (.setProperty org.apache.axis2.transport.http.HTTPConstants/PROXY
