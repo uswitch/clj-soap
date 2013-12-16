@@ -117,7 +117,7 @@
             (.setProxyPort (or proxy-port 3128))))))
     (when-let [timeout (or socket-timeout conn-timeout)]
       (doto base-options
-        (.setTimeOutInMilliSeconds timeout)
+        (.setTimeOutInMilliSeconds (Integer. timeout))
         (.setProperty org.apache.axis2.transport.http.HTTPConstants/SO_TIMEOUT, socket-timeout)
         (.setProperty org.apache.axis2.transport.http.HTTPConstants/CONNECTION_TIMEOUT, conn-timeout)))
     base-options))
